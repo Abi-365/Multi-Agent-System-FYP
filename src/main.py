@@ -13,6 +13,7 @@ np.random.seed(42)
 
 
 def apply_strategy(env, strategy_name):
+    
     if strategy_name == "random":
         env.move_agents_random()
     elif strategy_name == "centralised":
@@ -24,11 +25,7 @@ def apply_strategy(env, strategy_name):
 
 
 def choose_adaptive_strategy(dropout_percentage):
-    """
-    Adaptive layer uses only the strongest candidates:
-    - Decentralised for low failure
-    - Hybrid for moderate/severe failure
-    """
+    
     if dropout_percentage <= 0.1:
         return "decentralised"
     else:
@@ -36,6 +33,7 @@ def choose_adaptive_strategy(dropout_percentage):
 
 
 def run_fixed_strategy(strategy_name, dropout_percentage, steps=50, width=20, height=20, num_agents=10):
+    
     env = GridEnvironment(width, height, num_agents)
     coverage_history = []
 
@@ -60,6 +58,7 @@ def run_fixed_strategy(strategy_name, dropout_percentage, steps=50, width=20, he
 
 
 def run_adaptive_strategy(dropout_percentage, steps=50, width=20, height=20, num_agents=10):
+    
     env = GridEnvironment(width, height, num_agents)
     coverage_history = []
 
@@ -89,6 +88,7 @@ def run_adaptive_strategy(dropout_percentage, steps=50, width=20, height=20, num
 
 
 def save_results(filename, coverage_history):
+    
     os.makedirs("results", exist_ok=True)
 
     with open(filename, "w", newline="") as file:
@@ -100,6 +100,7 @@ def save_results(filename, coverage_history):
 
 
 def print_summary(dropout_percentage, results):
+    
     print("\n" + "=" * 60)
     print(f"SUMMARY FOR {int(dropout_percentage * 100)}% DROPOUT")
     print("=" * 60)
@@ -121,17 +122,35 @@ def print_summary(dropout_percentage, results):
 
 
 def plot_results(dropout_percentage, results, steps=50):
+    
     plt.figure(figsize=(10, 6))
 
     for strategy_name, history in results.items():
-        plt.plot(range(1, steps + 1), history, label=strategy_name)
+        plt.plot(
+            range(1, steps + 1),
+            history,
+            label=strategy_name
+        )
 
-    plt.axvline(x=20, linestyle="--", label="Dropout Step")
-    plt.title(f"Strategy Performance Under {int(dropout_percentage * 100)}% Dropout")
+    plt.axvline(
+        x=20,
+        linestyle="--",
+        label="Dropout Step"
+    )
+
+    plt.title(
+        f"Strategy Performance Under {int(dropout_percentage * 100)}% Dropout"
+    )
     plt.xlabel("Step")
     plt.ylabel("Coverage (%)")
     plt.legend()
     plt.tight_layout()
+
+    os.makedirs("figures", exist_ok=True)
+
+    figure_name = f"figures/{int(dropout_percentage * 100)}pct_dropout.png"
+    plt.savefig(figure_name)
+
     plt.show()
 
 
@@ -155,7 +174,7 @@ def main():
         # Layer 2: adaptive optimisation using strongest candidates
         results["Adaptive"] = run_adaptive_strategy(dropout_percentage, steps)
 
-        # Save results
+
         for strategy_name, history in results.items():
             filename = f"results/{strategy_name.lower()}_{int(dropout_percentage * 100)}pct_dropout.csv"
             save_results(filename, history)
